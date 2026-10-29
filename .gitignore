@@ -1,0 +1,28 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ── Environments ──────────────────────────────────────────────────────────────
+.env
+.venv
+venv/
+env/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Model (large binary — rebuilt automatically from CSV on first run) ─────────
+car_price_model.pkl
+
+# ── API & local-only files ─────────────────────────────────────────────────────
+api.py
+build_model.py
+test_model.py
+test_api.py
+Used_Car_API.postman_collection.json
