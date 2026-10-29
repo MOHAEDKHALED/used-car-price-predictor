@@ -1,0 +1,756 @@
+{
+  "info": {
+    "name": "🚗 Used Car Price Predictor API",
+    "_postman_id": "used-car-api-collection-v1",
+    "description": "Complete API test collection for the Used Car Price Predictor.\n\n## How to use\n1. Run the API first: `python api.py`\n2. Import this file into Postman\n3. Run individual requests or use **Collection Runner** to run all at once\n\n## Base URL\nhttp://127.0.0.1:5000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "📋 1. Index — Welcome & Endpoints",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/",
+          "host": ["{{base_url}}"],
+          "path": [""]
+        },
+        "description": "Returns a welcome message and lists all available API endpoints."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response is JSON', () => {",
+              "  pm.response.to.be.json;",
+              "});",
+              "",
+              "pm.test('status == ok', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('ok');",
+              "});",
+              "",
+              "pm.test('endpoints key exists', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('endpoints');",
+              "});",
+              "",
+              "pm.test('message key exists', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"ok\",\n  \"message\": \"Used Car Price Predictor API is running 🚗\",\n  \"endpoints\": {\n    \"GET  /\": \"This help message\",\n    \"GET  /health\": \"Health check\",\n    \"GET  /options\": \"Valid dropdown values\",\n    \"POST /predict\": \"Predict car selling price\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "❤️ 2. Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Checks if the API is alive and the model is loaded."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('status == healthy', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('healthy');",
+              "});",
+              "",
+              "pm.test('model_loaded is true', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.model_loaded).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response time < 500ms', () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"healthy\",\n  \"model_loaded\": true\n}"
+        }
+      ]
+    },
+    {
+      "name": "📂 3a. Options — All Brands & Models",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/options",
+          "host": ["{{base_url}}"],
+          "path": ["options"]
+        },
+        "description": "Returns all valid values for brands, models, fuel types, and transmission types."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('brands is non-empty array', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.brands).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('models is non-empty array', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.models).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('fuel_types is non-empty array', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.fuel_types).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('transmission_types is non-empty array', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.transmission_types).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('Has at least 10 brands', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.brands.length).to.be.at.least(10);",
+              "});",
+              "",
+              "// Save brands to environment for later use",
+              "const body = pm.response.json();",
+              "pm.environment.set('available_brands', JSON.stringify(body.brands));",
+              "pm.environment.set('available_fuel_types', JSON.stringify(body.fuel_types));",
+              "pm.environment.set('available_transmissions', JSON.stringify(body.transmission_types));",
+              "",
+              "console.log('✅ Brands:', body.brands.length, 'total');",
+              "console.log('✅ Models:', body.models.length, 'total');",
+              "console.log('✅ Fuel types:', body.fuel_types);",
+              "console.log('✅ Transmissions:', body.transmission_types);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"brands\": [\"Ashok\", \"Audi\", \"BMW\", \"Chevrolet\", \"Datsun\", \"Fiat\", \"Force\", \"Ford\", \"Honda\", \"Hyundai\", \"Isuzu\", \"Jaguar\", \"Jeep\", \"Kia\", \"Land\", \"Lexus\", \"MG\", \"Mahindra\", \"Maruti\", \"Mercedes-Benz\", \"Mini\", \"Mitsubishi\", \"Nissan\", \"Opel\", \"Porsche\", \"Renault\", \"Skoda\", \"Tata\", \"Toyota\", \"Volkswagen\", \"Volvo\", \"isuzu\"],\n  \"models\": [\"...\"],\n  \"fuel_types\": [\"CNG\", \"Diesel\", \"Electric\", \"LPG\", \"Petrol\"],\n  \"transmission_types\": [\"Automatic\", \"Manual\"]\n}"
+        }
+      ]
+    },
+    {
+      "name": "📂 3b. Options — Filter by Brand (Maruti)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/options?brand=Maruti",
+          "host": ["{{base_url}}"],
+          "path": ["options"],
+          "query": [
+            {
+              "key": "brand",
+              "value": "Maruti"
+            }
+          ]
+        },
+        "description": "Returns only models belonging to the selected brand (Maruti in this case)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Filtered models is non-empty', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.models).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('Has multiple Maruti models', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.models.length).to.be.at.least(5);",
+              "});",
+              "",
+              "console.log('Maruti models:', pm.response.json().models);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"brands\": [\"...\"],\n  \"models\": [\"Alto\", \"Baleno\", \"Brezza\", \"Ciaz\", \"Dzire\", \"Eeco\", \"Ertiga\", \"Ignis\", \"S-Cross\", \"S-Presso\", \"Swift\", \"Swift Dzire\", \"SX4\", \"Wagon R\", \"XL6\", \"Zen\"],\n  \"fuel_types\": [\"CNG\", \"Diesel\", \"Electric\", \"LPG\", \"Petrol\"],\n  \"transmission_types\": [\"Automatic\", \"Manual\"]\n}"
+        }
+      ]
+    },
+    {
+      "name": "🎯 4a. Predict — Maruti Swift (Standard)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 5,\n  \"km_driven\": 50000,\n  \"fuel_type\": \"Petrol\",\n  \"transmission_type\": \"Manual\",\n  \"brand\": \"Maruti\",\n  \"model\": \"Swift\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Standard prediction: 5-year-old Maruti Swift, Petrol, Manual, 50k km."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('predicted_price exists', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('predicted_price');",
+              "});",
+              "",
+              "pm.test('currency is INR', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.currency).to.eql('INR');",
+              "});",
+              "",
+              "pm.test('input is echoed back', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('input');",
+              "});",
+              "",
+              "pm.test('predicted_price is a positive number', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.predicted_price).to.be.a('number');",
+              "  pm.expect(body.predicted_price).to.be.above(0);",
+              "});",
+              "",
+              "pm.test('predicted_price in plausible range (₹10k – ₹1cr)', () => {",
+              "  const price = pm.response.json().predicted_price;",
+              "  pm.expect(price).to.be.within(10000, 10000000);",
+              "});",
+              "",
+              "pm.test('Response time < 2000ms', () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});",
+              "",
+              "const price = pm.response.json().predicted_price;",
+              "console.log('💰 Predicted Price: ₹' + price.toLocaleString('en-IN'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"predicted_price\": 479882.86,\n  \"currency\": \"INR\",\n  \"input\": {\n    \"vehicle_age\": 5,\n    \"km_driven\": 50000,\n    \"fuel_type\": \"Petrol\",\n    \"transmission_type\": \"Manual\",\n    \"brand\": \"Maruti\",\n    \"model\": \"Swift\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "🎯 4b. Predict — Hyundai Creta Diesel (New)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 1,\n  \"km_driven\": 10000,\n  \"fuel_type\": \"Diesel\",\n  \"transmission_type\": \"Automatic\",\n  \"brand\": \"Hyundai\",\n  \"model\": \"Creta\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Nearly new 1-year-old Hyundai Creta Diesel Automatic — expect high price."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('predicted_price is high (nearly new car)', () => {",
+              "  const price = pm.response.json().predicted_price;",
+              "  pm.expect(price).to.be.above(500000);",
+              "  console.log('💰 Creta Price: ₹' + price.toLocaleString('en-IN'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"predicted_price\": 2228200.0,\n  \"currency\": \"INR\",\n  \"input\": {\n    \"vehicle_age\": 1,\n    \"km_driven\": 10000,\n    \"fuel_type\": \"Diesel\",\n    \"transmission_type\": \"Automatic\",\n    \"brand\": \"Hyundai\",\n    \"model\": \"Creta\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "🎯 4c. Predict — Tata Nexon Electric",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 3,\n  \"km_driven\": 30000,\n  \"fuel_type\": \"Electric\",\n  \"transmission_type\": \"Automatic\",\n  \"brand\": \"Tata\",\n  \"model\": \"Nexon\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "3-year-old Tata Nexon Electric."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Price is reasonable for electric car', () => {",
+              "  const price = pm.response.json().predicted_price;",
+              "  pm.expect(price).to.be.above(300000);",
+              "  console.log('💰 Nexon EV Price: ₹' + price.toLocaleString('en-IN'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"predicted_price\": 1014710.0,\n  \"currency\": \"INR\",\n  \"input\": {\n    \"vehicle_age\": 3,\n    \"km_driven\": 30000,\n    \"fuel_type\": \"Electric\",\n    \"transmission_type\": \"Automatic\",\n    \"brand\": \"Tata\",\n    \"model\": \"Nexon\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "🎯 4d. Predict — BMW 5 Series Luxury",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 2,\n  \"km_driven\": 20000,\n  \"fuel_type\": \"Petrol\",\n  \"transmission_type\": \"Automatic\",\n  \"brand\": \"BMW\",\n  \"model\": \"5 Series\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Luxury car test — BMW 5 Series, 2 years old. Expect very high price."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Luxury car price is above ₹20 Lakh', () => {",
+              "  const price = pm.response.json().predicted_price;",
+              "  pm.expect(price).to.be.above(2000000);",
+              "  console.log('💰 BMW Price: ₹' + price.toLocaleString('en-IN'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"predicted_price\": 4587863.0,\n  \"currency\": \"INR\",\n  \"input\": {\n    \"vehicle_age\": 2,\n    \"km_driven\": 20000,\n    \"fuel_type\": \"Petrol\",\n    \"transmission_type\": \"Automatic\",\n    \"brand\": \"BMW\",\n    \"model\": \"5 Series\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔴 5a. Error — Missing Fields",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 5,\n  \"km_driven\": 50000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "❌ Should return 400 — missing fuel_type, transmission_type, brand, model."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error message exists', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('error');",
+              "});",
+              "",
+              "pm.test('missing_fields list returned', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('missing_fields');",
+              "  pm.expect(body.missing_fields).to.be.an('array').that.is.not.empty;",
+              "});",
+              "",
+              "pm.test('required_fields list returned', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('required_fields');",
+              "});",
+              "",
+              "console.log('Missing fields:', pm.response.json().missing_fields);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{\n  \"error\": \"Missing required fields\",\n  \"missing_fields\": [\"fuel_type\", \"transmission_type\", \"brand\", \"model\"],\n  \"required_fields\": [\"vehicle_age\", \"km_driven\", \"fuel_type\", \"transmission_type\", \"brand\", \"model\"]\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔴 5b. Error — Negative km_driven",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": 5,\n  \"km_driven\": -1000,\n  \"fuel_type\": \"Petrol\",\n  \"transmission_type\": \"Manual\",\n  \"brand\": \"Maruti\",\n  \"model\": \"Swift\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "❌ Should return 400 — km_driven cannot be negative."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error message about negative value', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('error');",
+              "  console.log('Error:', body.error);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{\n  \"error\": \"vehicle_age and km_driven must be non-negative\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔴 5c. Error — Wrong Content-Type",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/plain"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "this is not json at all"
+        },
+        "description": "❌ Should return 415 — Content-Type must be application/json."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 415 Unsupported Media Type', () => {",
+              "  pm.response.to.have.status(415);",
+              "});",
+              "",
+              "pm.test('Error message exists', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('error');",
+              "  console.log('Error:', body.error);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "Unsupported Media Type",
+          "code": 415,
+          "body": "{\n  \"error\": \"Request body must be JSON (Content-Type: application/json)\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔴 5d. Error — Non-numeric vehicle_age",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicle_age\": \"five\",\n  \"km_driven\": 50000,\n  \"fuel_type\": \"Petrol\",\n  \"transmission_type\": \"Manual\",\n  \"brand\": \"Maruti\",\n  \"model\": \"Swift\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "❌ Should return 400 — vehicle_age must be a number, not a string."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error about invalid type', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('error');",
+              "  console.log('Error:', body.error);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{\n  \"error\": \"vehicle_age and km_driven must be integers: invalid literal for int() with base 10: 'five'\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔴 5e. Error — Empty Body",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/predict",
+          "host": ["{{base_url}}"],
+          "path": ["predict"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "❌ Should return 400 — empty JSON body, all fields missing."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('All 6 fields are reported missing', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.missing_fields.length).to.eql(6);",
+              "  console.log('All missing:', body.missing_fields);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "Expected Response",
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{\n  \"error\": \"Missing required fields\",\n  \"missing_fields\": [\"vehicle_age\", \"km_driven\", \"fuel_type\", \"transmission_type\", \"brand\", \"model\"],\n  \"required_fields\": [\"vehicle_age\", \"km_driven\", \"fuel_type\", \"transmission_type\", \"brand\", \"model\"]\n}"
+        }
+      ]
+    }
+  ]
+}
